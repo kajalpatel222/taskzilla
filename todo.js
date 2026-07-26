@@ -7,6 +7,14 @@ const path = require('path');
 
 const TASKS_FILE = path.join(__dirname, 'tasks.json');
 
+const COMPLETION_MESSAGES = [
+  '💥 STOMP! Task crushed: {text}',
+  '🦖 Taskzilla obliterates: {text}',
+  '🔥 ROAR! Another one bites the dust: {text}',
+  '🐾 Task flattened under monstrous claws: {text}',
+  '😋 Taskzilla feasts on: {text}',
+];
+
 function loadTasks() {
   if (!fs.existsSync(TASKS_FILE)) {
     return [];
@@ -84,7 +92,8 @@ function completeTask(rawId) {
   const task = findTaskOrExit(tasks, id);
   task.done = true;
   saveTasks(tasks);
-  console.log(`Marked task ${id} as done: ${task.text}`);
+  const template = COMPLETION_MESSAGES[Math.floor(Math.random() * COMPLETION_MESSAGES.length)];
+  console.log(template.replace('{text}', task.text));
 }
 
 function deleteTask(rawId) {
