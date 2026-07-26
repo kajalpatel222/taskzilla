@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const TASKS_FILE = path.join(__dirname, 'tasks.json');
+const STATS_FILE = path.join(__dirname, 'stats.json');
 
 const COMPLETION_MESSAGES = [
   '💥 STOMP! Task crushed: {text}',
@@ -14,6 +15,37 @@ const COMPLETION_MESSAGES = [
   '🐾 Task flattened under monstrous claws: {text}',
   '😋 Taskzilla feasts on: {text}',
 ];
+
+const RANKS = [
+  { min: 16, name: 'Kaiju Mode' },
+  { min: 6, name: 'Rampaging Zilla' },
+  { min: 1, name: 'Baby Zilla' },
+  { min: 0, name: 'Egg' },
+];
+
+function getRank(completedCount) {
+  return RANKS.find((r) => completedCount >= r.min).name;
+}
+
+function loadStats() {
+  if (!fs.existsSync(STATS_FILE)) {
+    return { completedCount: 0 };
+  }
+  const raw = fs.readFileSync(STATS_FILE, 'utf8').trim();
+  if (!raw) {
+    return { completedCount: 0 };
+  }
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error(`Error: ${STATS_FILE} is corrupted and could not be parsed.`);
+    process.exit(1);
+  }
+}
+
+function saveStats(stats) {
+  fs.writeFileSync(STATS_FILE, JSON.stringify(stats, null, 2) + '\n');
+}
 
 function loadTasks() {
   if (!fs.existsSync(TASKS_FILE)) {
@@ -90,10 +122,22 @@ function completeTask(rawId) {
   const id = parseId(rawId);
   const tasks = loadTasks();
   const task = findTaskOrExit(tasks, id);
-  task.done = true;
+  const stats = loadStats();
+  if (!task.done) {
+    task.done = true;
+    stats.completedCount += 1;
+    saveStats(stats);
+  }
   saveTasks(tasks);
   const template = COMPLETION_MESSAGES[Math.floor(Math.random() * COMPLETION_MESSAGES.length)];
   console.log(template.replace('{text}', task.text));
+  console.log(`Rank: ${getRank(stats.completedCount)} (${stats.completedCount} completed all-time)`);
+}
+
+function showStats() {
+  const stats = loadStats();
+  console.log(`Rank: ${getRank(stats.completedCount)}`);
+  console.log(`Tasks completed all-time: ${stats.completedCount}`);
 }
 
 function deleteTask(rawId) {
@@ -113,6 +157,7 @@ Usage:
   todo list           List all tasks
   todo done <id>      Mark a task as done
   todo delete <id>    Delete a task
+  todo stats          Show your all-time completion count and rank
   todo help           Show this help message`);
 }
 
@@ -131,6 +176,9 @@ function main() {
       break;
     case 'delete':
       deleteTask(rest[0]);
+      break;
+    case 'stats':
+      showStats();
       break;
     case 'help':
     case undefined:

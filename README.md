@@ -34,8 +34,32 @@ todo list
 | `list`         | List all tasks with their status  |
 | `done <id>`    | Mark a task as done                |
 | `delete <id>`  | Delete a task                      |
+| `stats`        | Show your all-time completion count and rank |
 | `help`         | Show usage information              |
+
+## Completing tasks
+
+Marking a task done with `todo done <id>` prints a random Taskzilla-flavored message instead of a plain confirmation:
+
+```
+$ todo done 1
+💥 STOMP! Task crushed: Buy milk
+Rank: Baby Zilla (1 completed all-time)
+```
+
+## Ranks
+
+Taskzilla tracks how many tasks you've completed all-time and levels you up as you go:
+
+| Tasks completed | Rank              |
+| ---------------- | ----------------- |
+| 0                 | Egg                |
+| 1–5               | Baby Zilla         |
+| 6–15              | Rampaging Zilla    |
+| 16+               | Kaiju Mode         |
+
+Check your progress anytime with `todo stats`.
 
 ## Storage
 
-Tasks are stored in `tasks.json` in the project directory as plain JSON — no database required. This file is git-ignored so your personal task list never gets committed.
+Tasks are stored in `tasks.json` and your all-time completion stats in `stats.json`, both plain JSON files in the project directory — no database required. Both files are git-ignored so your personal data never gets committed.
