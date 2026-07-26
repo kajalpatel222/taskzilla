@@ -315,6 +315,9 @@ FakesAssemblies/
 .ntvs_analysis.dat
 node_modules/
 
+# Taskzilla local data
+/tasks.json
+
 # Visual Studio 6 build log
 *.plg
 

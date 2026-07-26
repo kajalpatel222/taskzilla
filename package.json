@@ -1,0 +1,10 @@
+{
+  "name": "taskzilla",
+  "version": "1.0.0",
+  "description": "Lightweight no-dependency CLI to-do list manager",
+  "main": "todo.js",
+  "bin": {
+    "todo": "./todo.js"
+  },
+  "license": "MIT"
+}
