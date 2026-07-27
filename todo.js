@@ -4,9 +4,29 @@
 
 const fs = require('fs');
 const path = require('path');
+const Anthropic = require('@anthropic-ai/sdk');
 
 const TASKS_FILE = path.join(__dirname, 'tasks.json');
 const STATS_FILE = path.join(__dirname, 'stats.json');
+
+function loadEnvFile() {
+  const envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return;
+  const lines = fs.readFileSync(envPath, 'utf8').split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    const value = trimmed.slice(eq + 1).trim();
+    if (!(key in process.env)) {
+      process.env[key] = value;
+    }
+  }
+}
+
+loadEnvFile();
 
 const COMPLETION_MESSAGES = [
   '💥 STOMP! Task crushed: {text}',
@@ -140,6 +160,53 @@ function showStats() {
   console.log(`Tasks completed all-time: ${stats.completedCount}`);
 }
 
+async function suggestTask() {
+  const tasks = loadTasks().filter((t) => !t.done);
+  if (tasks.length === 0) {
+    console.log("No pending tasks — you're all caught up! 🦖");
+    return;
+  }
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error(
+      'Error: ANTHROPIC_API_KEY is not set. Add it to a .env file in the project root, e.g.\n' +
+      '  ANTHROPIC_API_KEY=sk-ant-...'
+    );
+    process.exit(1);
+  }
+
+  const client = new Anthropic();
+  const taskList = tasks.map((t) => `- ${t.text}`).join('\n');
+
+  try {
+    const response = await client.messages.create(
+      {
+        model: 'claude-haiku-4-5',
+        max_tokens: 300,
+        system:
+          'You are Taskzilla, a friendly monster that helps people pick their next to-do. ' +
+          'Given a list of pending tasks, pick exactly one and explain why in one playful, ' +
+          'monster-themed sentence. Be concise — no preamble, no markdown, just the pick and the reason.',
+        messages: [{ role: 'user', content: `Pending tasks:\n${taskList}` }],
+      },
+      { timeout: 15000 }
+    );
+    const text = response.content.find((b) => b.type === 'text')?.text ?? '';
+    console.log(`🦖 Taskzilla says: ${text}`);
+  } catch (err) {
+    if (err instanceof Anthropic.AuthenticationError) {
+      console.error('Error: Anthropic API rejected the key. Check ANTHROPIC_API_KEY in your .env file.');
+    } else if (err instanceof Anthropic.APIConnectionError) {
+      console.error('Error: could not reach the Anthropic API. Check your network connection.');
+    } else if (err instanceof Anthropic.APIError) {
+      console.error(`Error: Anthropic API request failed (${err.status}): ${err.message}`);
+    } else {
+      console.error('Error: unexpected failure calling the Anthropic API.');
+    }
+    process.exit(1);
+  }
+}
+
 function deleteTask(rawId) {
   const id = parseId(rawId);
   const tasks = loadTasks();
@@ -158,10 +225,11 @@ Usage:
   todo done <id>      Mark a task as done
   todo delete <id>    Delete a task
   todo stats          Show your all-time completion count and rank
+  todo suggest        Ask Taskzilla (Claude) which pending task to do next
   todo help           Show this help message`);
 }
 
-function main() {
+async function main() {
   const [command, ...rest] = process.argv.slice(2);
 
   switch (command) {
@@ -179,6 +247,9 @@ function main() {
       break;
     case 'stats':
       showStats();
+      break;
+    case 'suggest':
+      await suggestTask();
       break;
     case 'help':
     case undefined:

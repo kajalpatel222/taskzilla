@@ -1,10 +1,21 @@
 # taskzilla
 
-Taskzilla is a lightweight command-line to-do list manager built in JavaScript. Add tasks, mark them done, and delete the ones you've conquered, all from your terminal, no database, no dependencies, no fuss. Built as a hands-on project to practice CLI development and git workflow while stomping through a task list one command at a time.
+Taskzilla is a lightweight command-line to-do list manager built in JavaScript. Add tasks, mark them done, and delete the ones you've conquered, all from your terminal, no database, no fuss. Built as a hands-on project to practice CLI development and git workflow while stomping through a task list one command at a time.
 
 ## Requirements
 
-- Node.js (no external packages needed — pure Node built-ins)
+- Node.js
+- Run `npm install` to pull in `@anthropic-ai/sdk` (used only by the `suggest` command)
+
+## Setup
+
+The `suggest` command calls the Claude API, which needs an API key. Create a `.env` file in the project root (it's git-ignored, so your key is never committed):
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+No API key is needed for any other command.
 
 ## Usage
 
@@ -35,6 +46,7 @@ todo list
 | `done <id>`    | Mark a task as done                |
 | `delete <id>`  | Delete a task                      |
 | `stats`        | Show your all-time completion count and rank |
+| `suggest`      | Ask Taskzilla (Claude) which pending task to do next |
 | `help`         | Show usage information              |
 
 ## Completing tasks
@@ -59,6 +71,17 @@ Taskzilla tracks how many tasks you've completed all-time and levels you up as y
 | 16+               | Kaiju Mode         |
 
 Check your progress anytime with `todo stats`.
+
+## Suggest
+
+Not sure what to tackle next? `todo suggest` sends your pending tasks to Claude and gets back a playful, Taskzilla-voiced pick:
+
+```
+$ todo suggest
+🦖 Taskzilla says: Crush "Buy milk" first — even a monster needs breakfast before conquering the rest of the list.
+```
+
+Requires `ANTHROPIC_API_KEY` in `.env` (see Setup above). If you have no pending tasks, it skips the API call entirely.
 
 ## Storage
 

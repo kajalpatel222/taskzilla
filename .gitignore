@@ -318,6 +318,7 @@ node_modules/
 # Taskzilla local data
 /tasks.json
 /stats.json
+/.env
 
 # Visual Studio 6 build log
 *.plg
