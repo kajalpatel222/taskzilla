@@ -47,7 +47,7 @@ todo list
 | `delete <id>`  | Delete a task                      |
 | `stats`        | Show your all-time completion count and rank |
 | `suggest`      | Ask Taskzilla (Claude) which pending task to do next |
-| `ask <request>` | Ask Taskzilla to add or list tasks via natural language |
+| `ask <request>` | Ask Taskzilla to add, list, complete, or delete tasks, or check your stats, via natural language |
 | `help`         | Show usage information              |
 
 ## Completing tasks
@@ -86,18 +86,23 @@ Requires `ANTHROPIC_API_KEY` in `.env` (see Setup above). If you have no pending
 
 ## Ask
 
-`todo ask "<request>"` lets Claude add or list tasks for you, in natural language — no need to remember exact command syntax:
+`todo ask "<request>"` lets Claude add, list, complete, or delete tasks — or check your stats — in natural language, no need to remember exact syntax or task ids:
 
 ```
 $ todo ask "remind me to call the dentist"
-Added task 4: call the dentist
+🦖 Taskzilla says: Added "call the dentist" to your list — one more thing to conquer! 🦖
+
+$ todo ask "mark buy milk as done"
+🦖 Taskzilla says: 🎉 Taskzilla has chomped down on that milk-buying quest and marked it complete!
 
 $ todo ask "what's on my list?"
-[ ] 1  Buy milk
-[ ] 4  call the dentist
+🦖 Taskzilla says: Behold, your task list! 🦕
+
+[x] 1  Buy milk
+[ ] 2  Write report
 ```
 
-Claude decides which action fits your request (or replies in plain text if neither applies) — you don't have to phrase it as a command. Marking tasks done or deleting them via `ask` isn't supported yet; use `todo done <id>` / `todo delete <id>` for those. Requires `ANTHROPIC_API_KEY` in `.env` (see Setup above).
+You don't need to give an exact task id — if Claude needs to figure one out from your description first, it looks it up itself before acting, all within the same command. Claude replies in plain text if your request doesn't match anything it can do. Requires `ANTHROPIC_API_KEY` in `.env` (see Setup above).
 
 ## Storage
 

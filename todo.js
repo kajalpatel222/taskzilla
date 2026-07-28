@@ -19,7 +19,7 @@ Usage:
   todo delete <id>    Delete a task
   todo stats          Show your all-time completion count and rank
   todo suggest        Ask Taskzilla (Claude) which pending task to do next
-  todo ask <request>  Ask Taskzilla to add/list tasks via natural language (more coming soon)
+  todo ask <request>  Ask Taskzilla to add, list, complete, or delete tasks or check your stats via natural language
   todo help           Show this help message`);
 }
 
@@ -27,18 +27,39 @@ async function main() {
   const [command, ...rest] = process.argv.slice(2);
 
   switch (command) {
-    case 'add':
-      addTask(rest.join(' '));
+    case 'add': {
+      const result = addTask(rest.join(' '));
+      if (result.ok) {
+        console.log(result.message);
+      } else {
+        console.error(result.message);
+        process.exit(1);
+      }
       break;
+    }
     case 'list':
       listTasks();
       break;
-    case 'done':
-      completeTask(rest[0]);
+    case 'done': {
+      const result = completeTask(rest[0]);
+      if (result.ok) {
+        console.log(result.message);
+      } else {
+        console.error(result.message);
+        process.exit(1);
+      }
       break;
-    case 'delete':
-      deleteTask(rest[0]);
+    }
+    case 'delete': {
+      const result = deleteTask(rest[0]);
+      if (result.ok) {
+        console.log(result.message);
+      } else {
+        console.error(result.message);
+        process.exit(1);
+      }
       break;
+    }
     case 'stats':
       showStats();
       break;
