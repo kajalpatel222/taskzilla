@@ -5,11 +5,11 @@ Taskzilla is a lightweight command-line to-do list manager built in JavaScript. 
 ## Requirements
 
 - Node.js
-- Run `npm install` to pull in `@anthropic-ai/sdk` (used only by the `suggest` command)
+- Run `npm install` to pull in `@anthropic-ai/sdk` (used by the `suggest` and `ask` commands)
 
 ## Setup
 
-The `suggest` command calls the Claude API, which needs an API key. Create a `.env` file in the project root (it's git-ignored, so your key is never committed):
+The `suggest` and `ask` commands call the Claude API, which needs an API key. Create a `.env` file in the project root (it's git-ignored, so your key is never committed):
 
 ```
 ANTHROPIC_API_KEY=sk-ant-...
@@ -47,6 +47,7 @@ todo list
 | `delete <id>`  | Delete a task                      |
 | `stats`        | Show your all-time completion count and rank |
 | `suggest`      | Ask Taskzilla (Claude) which pending task to do next |
+| `ask <request>` | Ask Taskzilla to add or list tasks via natural language |
 | `help`         | Show usage information              |
 
 ## Completing tasks
@@ -82,6 +83,21 @@ $ todo suggest
 ```
 
 Requires `ANTHROPIC_API_KEY` in `.env` (see Setup above). If you have no pending tasks, it skips the API call entirely.
+
+## Ask
+
+`todo ask "<request>"` lets Claude add or list tasks for you, in natural language — no need to remember exact command syntax:
+
+```
+$ todo ask "remind me to call the dentist"
+Added task 4: call the dentist
+
+$ todo ask "what's on my list?"
+[ ] 1  Buy milk
+[ ] 4  call the dentist
+```
+
+Claude decides which action fits your request (or replies in plain text if neither applies) — you don't have to phrase it as a command. Marking tasks done or deleting them via `ask` isn't supported yet; use `todo done <id>` / `todo delete <id>` for those. Requires `ANTHROPIC_API_KEY` in `.env` (see Setup above).
 
 ## Storage
 
