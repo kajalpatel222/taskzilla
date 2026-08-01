@@ -1,6 +1,6 @@
 # Agent Loop Lab: Taskzilla
 
-Taskzilla is a lightweight command-line to-do list manager built in JavaScript. Add tasks, mark them done, and delete the ones you've conquered, all from your terminal, no database, no fuss. Built as a hands-on project to practice CLI development and git workflow while stomping through a task list one command at a time.
+Agent Loop Lab is a hands-on project for learning how Claude tool calling and reasoning loops actually work — inspired by Anthropic's Claude Platform 101 course, extended with a few experiments of my own. The testbed is **Taskzilla**, a lightweight command-line to-do list manager built in JavaScript: add tasks, mark them done, and delete the ones you've conquered, all from your terminal, no database, no fuss.
 
 ## Requirements
 
@@ -103,6 +103,24 @@ $ todo ask "what's on my list?"
 ```
 
 You don't need to give an exact task id — if Claude needs to figure one out from your description first, it looks it up itself before acting, all within the same command. Claude replies in plain text if your request doesn't match anything it can do. Requires `ANTHROPIC_API_KEY` in `.env` (see Setup above).
+
+### Tool calling vs. a reasoning loop
+
+`"mark buy milk as done"` doesn't carry a task id — Claude has to find it before it can act:
+
+```
+list_tasks()
+    ↓
+reason over the result
+    ↓
+complete_task(17)
+```
+
+That's not one function call, it's a loop: call a tool, read the result, decide the next step, repeat until the request is actually satisfied. `ask` runs on the Anthropic SDK's [Tool Runner](https://github.com/anthropics/anthropic-sdk-typescript) (`client.beta.messages.toolRunner`, see `lib/ask.js`), which drives that loop for up to 8 iterations instead of making a single request/response call.
+
+### Structured responses, not crashes
+
+Each tool in `lib/tools/` wraps a `store.js` function that returns `{ ok, message }` rather than printing an error and exiting. A failure becomes a `ToolError` the model can read and reason about — including the case where nothing went wrong but nothing changed either, like completing a task that's already done (`alreadyDone: true` in `lib/store.js`). A model never sees a crashed process, only whether the tool call succeeded — so every tool is written to say precisely what happened, not just whether it errored.
 
 ## Storage
 

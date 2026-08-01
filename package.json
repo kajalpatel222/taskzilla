@@ -1,10 +1,14 @@
 {
   "name": "taskzilla",
   "version": "1.0.0",
-  "description": "Lightweight CLI to-do list manager",
+  "description": "Hands-on lab for Claude tool calling and reasoning loops, built as a CLI to-do manager",
   "main": "todo.js",
   "bin": {
     "todo": "./todo.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kajalpatel222/agent-loop-lab.git"
   },
   "license": "MIT",
   "dependencies": {
